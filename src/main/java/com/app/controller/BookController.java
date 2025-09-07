@@ -20,31 +20,43 @@ import com.app.service.BookService;
 @RestController
 @RequestMapping("/api/books")
 public class BookController {
-  private final BookService svc;
-  public BookController(BookService svc){ this.svc = svc; }
+	private final BookService svc;
 
-  @PostMapping
-  @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<Book> create(@RequestBody Book book){
-    return ResponseEntity.status(201).body(svc.create(book));
-  }
+	public BookController(BookService svc) {
+		this.svc = svc;
+	}
 
-  @GetMapping
-  public ResponseEntity<List<Book>> list(@RequestParam(required = false) String q,
-                                         @RequestParam(required = false) Boolean available){
-    if (q != null && !q.isBlank()) return ResponseEntity.ok(svc.search(q));
-    if (available != null && available) return ResponseEntity.ok(svc.listAvailable());
-    return ResponseEntity.ok(svc.listAll());
-  }
+	@PostMapping
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<Book> create(@RequestBody Book book) {
+		return ResponseEntity.status(201).body(svc.create(book));
+	}
 
-  @GetMapping("/{id}")
-  public ResponseEntity<Book> get(@PathVariable String id){ return ResponseEntity.ok(svc.getById(id)); }
+	@GetMapping
+	public ResponseEntity<List<Book>> list(@RequestParam(required = false) String q,
+			@RequestParam(required = false) Boolean available) {
+		if (q != null && !q.isBlank())
+			return ResponseEntity.ok(svc.search(q));
+		if (available != null && available)
+			return ResponseEntity.ok(svc.listAvailable());
+		return ResponseEntity.ok(svc.listAll());
+	}
 
-  @PutMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<Book> update(@PathVariable String id, @RequestBody Book b){ return ResponseEntity.ok(svc.update(id, b)); }
+	@GetMapping("/{id}")
+	public ResponseEntity<Book> get(@PathVariable String id) {
+		return ResponseEntity.ok(svc.getById(id));
+	}
 
-  @DeleteMapping("/{id}")
-  @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<Void> delete(@PathVariable String id){ svc.delete(id); return ResponseEntity.noContent().build(); }
+	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<Book> update(@PathVariable String id, @RequestBody Book b) {
+		return ResponseEntity.ok(svc.update(id, b));
+	}
+
+	@DeleteMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<Void> delete(@PathVariable String id) {
+		svc.delete(id);
+		return ResponseEntity.noContent().build();
+	}
 }

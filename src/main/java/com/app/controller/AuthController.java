@@ -18,31 +18,32 @@ import com.app.service.UserService;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-  private final UserService userService;
-  private final AuthenticationManager authManager;
-  private final JwtUtil jwtUtil;
+	private final UserService userService;
+	private final AuthenticationManager authManager;
+	private final JwtUtil jwtUtil;
 
-  public AuthController(UserService userService, AuthenticationManager authManager, JwtUtil jwtUtil){
-    this.userService = userService; this.authManager = authManager; this.jwtUtil = jwtUtil;
-  }
+	public AuthController(UserService userService, AuthenticationManager authManager, JwtUtil jwtUtil) {
+		this.userService = userService;
+		this.authManager = authManager;
+		this.jwtUtil = jwtUtil;
+	}
 
-  @PostMapping("/register")
-  public ResponseEntity<?> register(@RequestBody AuthRequest req){
-    AppUser u = userService.register(req.username, req.password, req.role);
-    return ResponseEntity.ok(u);
-  }
+	@PostMapping("/register")
+	public ResponseEntity<?> register(@RequestBody AuthRequest req) {
+		AppUser u = userService.register(req.username, req.password, req.role);
+		return ResponseEntity.ok(u);
+	}
 
-  @PostMapping("/login")
-  public ResponseEntity<?> login(@RequestBody AuthRequest req){
-    // authenticate credentials
-    try {
-      authManager.authenticate(new UsernamePasswordAuthenticationToken(req.username, req.password));
-    } catch (BadCredentialsException ex) {
-      return ResponseEntity.status(401).body("invalid credentials");
-    }
-    AppUser u = userService.findByUsername(req.username);
-    String token = jwtUtil.generateToken(u.getUsername(), u.getRole());
-    return ResponseEntity.ok(new AuthResponse(token));
-  }
+	@PostMapping("/login")
+	public ResponseEntity<?> login(@RequestBody AuthRequest req) {
+		// authenticate credentials
+		try {
+			authManager.authenticate(new UsernamePasswordAuthenticationToken(req.username, req.password));
+		} catch (BadCredentialsException ex) {
+			return ResponseEntity.status(401).body("invalid credentials");
+		}
+		AppUser u = userService.findByUsername(req.username);
+		String token = jwtUtil.generateToken(u.getUsername(), u.getRole());
+		return ResponseEntity.ok(new AuthResponse(token));
+	}
 }
-
