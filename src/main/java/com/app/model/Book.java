@@ -1,43 +1,51 @@
 package com.app.model;
 
-import java.time.Instant;
-
-import jakarta.persistence.Column;
+import jakarta.persistence.Column; 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 @Entity
 @Table(name = "books")
 public class Book {
+
+
+	public Book( String title, String author, String isbn) {
+		super();
+		
+		this.title = title;
+		this.author = author;
+		this.isbn = isbn;
+		
+	}
+
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private String id;
+	private Long id;
+
 
 	@Column(nullable = false)
 	private String title;
 
+
 	@Column(nullable = false)
 	private String author;
 
+
+	@Column(unique = true)
 	private String isbn;
+
 
 	@Column(nullable = false)
 	private boolean available = true;
 
-	@Version
-	private Integer version;
 
-	@Column(name = "created_at")
-	private Instant createdAt = Instant.now();
-
-	// constructors, getters, setters
-	public Book() {
-	}
-	// ...
+	private Long borrowedByUserId;
 }

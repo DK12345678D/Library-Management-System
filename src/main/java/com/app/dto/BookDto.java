@@ -1,9 +1,73 @@
 package com.app.dto;
 
 public class BookDto {
-	public String id;
-	public String title;
-	public String author;
-	public String isbn;
-	public boolean available;
+	private Long id;
+	private String title;
+	private String author;
+	private String isbn;
+	private boolean available;
+	private Long borrowedByUserId;
+
+	public BookDto() {
+	}
+
+	public BookDto(Long id, String title, String author, String isbn, boolean available) {
+		super();
+		this.id = id;
+		this.title = title;
+		this.author = author;
+		this.isbn = isbn;
+		this.available = available;
+		
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getAuthor() {
+		return author;
+	}
+
+	public void setAuthor(String author) {
+		this.author = author;
+	}
+
+	public String getIsbn() {
+		return isbn;
+	}
+
+	public void setIsbn(String isbn) {
+		this.isbn = isbn;
+	}
+
+	public boolean isAvailable() {
+		return available;
+	}
+
+	public void setAvailable(boolean available) {
+		this.available = available;
+	}
+
+	public Long getBorrowedByUserId() {
+		return borrowedByUserId;
+	}
+
+	public void setBorrowedByUserId(Long borrowedByUserId) {
+		this.borrowedByUserId = borrowedByUserId;
+	}
 }

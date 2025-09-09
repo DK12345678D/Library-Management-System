@@ -1,32 +1,39 @@
 package com.app.service;
 
-import java.util.UUID;
 
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.app.model.AppUser;
+import com.app.model.Role;
 import com.app.repo.UserRepository;
+
 
 @Service
 public class UserService {
-  private final UserRepository repo;
-  private final PasswordEncoder encoder;
 
-  public UserService(UserRepository repo, PasswordEncoder encoder){ this.repo = repo; this.encoder = encoder; }
 
-  public AppUser register(String username, String rawPassword, String role) {
-    if (repo.findByUsername(username).isPresent()) throw new RuntimeException("username exists");
-    AppUser u = new AppUser();
-    u.setId(UUID.randomUUID().toString());
-    u.setUsername(username);
-    u.setPassword(encoder.encode(rawPassword));
-    u.setRole(role == null ? "MEMBER" : role.toUpperCase());
-    return repo.save(u);
-  }
+@Autowired
+private UserRepository userRepository;
 
-  public AppUser findByUsername(String username){
-    return repo.findByUsername(username).orElseThrow(() -> new RuntimeException("user not found"));
-  }
+
+@Autowired
+private PasswordEncoder passwordEncoder;
+
+
+public AppUser registerUser(String username, String rawPassword, Role role) throws IllegalStateException {
+Optional<AppUser> existing = userRepository.findByUsername(username);
+if (existing.isPresent()) throw new IllegalStateException("Username already exists");
+AppUser u = new AppUser(username, passwordEncoder.encode(rawPassword), role);
+return userRepository.save(u);
+}
+
+
+public Optional<AppUser> findByUsername(String username) {
+return userRepository.findByUsername(username);
+}
 }
 

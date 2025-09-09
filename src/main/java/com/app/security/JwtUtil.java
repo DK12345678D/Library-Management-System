@@ -1,55 +1,54 @@
 package com.app.security;
 
-import java.security.Key; 
 import java.util.Date;
+import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 
 @Component
 public class JwtUtil {
-  @Value("${app.jwt.secret}")
-  private String jwtSecret;
 
-  @Value("${app.jwt.expiration-ms}")
-  private long jwtExpirationMs;
+	@Value("${app.jwt.secret}")
+	private String secret;
 
-  private Key getKey(){
-    return Keys.hmacShaKeyFor(jwtSecret.getBytes());
-  }
+	@Value("${app.jwt.expiration-ms}")
+	private long expirationMs;
 
-  public String generateToken(String username, String role){
-    Date now = new Date();
-    Date exp = new Date(now.getTime() + jwtExpirationMs);
-    return Jwts.builder()
-        .setSubject(username)
-        .claim("role", role)
-        .setIssuedAt(now)
-        .setExpiration(exp)
-        .signWith(getKey(), SignatureAlgorithm.HS256)
-        .compact();
-  }
+	public String generateToken(String username) {
+		Date now = new Date();
+		Date expiry = new Date(now.getTime() + expirationMs);
+		return Jwts.builder().setSubject(username).setIssuedAt(now).setExpiration(expiry)
+				.signWith(SignatureAlgorithm.HS256, secret).compact();
+	}
 
-  public boolean validateToken(String token){
-    try {
-      Jwts.parserBuilder().setSigningKey(getKey()).build().parseClaimsJws(token);
-      return true;
-    } catch (JwtException | IllegalArgumentException e) {
-      return false;
-    }
-  }
+	public String extractUsername(String token) {
+		return extractClaim(token, Claims::getSubject);
+	}
 
-  public String getUsernameFromToken(String token){
-    return Jwts.parserBuilder().setSigningKey(getKey()).build()
-        .parseClaimsJws(token).getBody().getSubject();
-  }
+	public Date extractExpiration(String token) {
+		return extractClaim(token, Claims::getExpiration);
+	}
 
-  public String getRoleFromToken(String token){
-    Object r = Jwts.parserBuilder().setSigningKey(getKey()).build()
-        .parseClaimsJws(token).getBody().get("role");
-    return r == null ? null : r.toString();
-  }
+	public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+		final Claims claims = extractAllClaims(token);
+		return claimsResolver.apply(claims);
+	}
+
+	private Claims extractAllClaims(String token) {
+		return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+	}
+
+	public boolean isTokenValid(String token, String username) {
+		final String extractedUser = extractUsername(token);
+		return (extractedUser.equals(username) && !isTokenExpired(token));
+	}
+
+	private boolean isTokenExpired(String token) {
+		return extractExpiration(token).before(new Date());
+	}
 }
